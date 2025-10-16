@@ -1,0 +1,9 @@
+langchain
+langchain-ollama
+
+python-dotenv
+googletrans
+pytest
+pytest-cov
+typing-extensions
+aiohttp
