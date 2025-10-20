@@ -1,5 +1,8 @@
 """Translation service implementation using googletrans."""
 import logging
+import asyncio
+import inspect
+from threading import Thread
 from typing import Optional, Dict
 from functools import lru_cache
 from googletrans import Translator, LANGUAGES
@@ -23,8 +26,23 @@ class TranslationService:
         self.use_cache = self.config.get("use_cache", True)
         self.source_lang = self.config.get("source_lang", "auto")
         self.target_lang = self.config.get("target_lang", "en")
+        # Create a dedicated background event loop to run any awaited operations
+        self._loop = asyncio.new_event_loop()
+        self._loop_thread = Thread(target=self._run_event_loop, daemon=True)
+        self._loop_thread.start()
         
         logger.debug(f"TranslationService configured with: {self.config}")
+
+    def _run_event_loop(self) -> None:
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_forever()
+
+    def _resolve_maybe_awaitable(self, value):
+        """Resolve value that might be an awaitable to its result synchronously."""
+        if inspect.isawaitable(value):
+            future = asyncio.run_coroutine_threadsafe(value, self._loop)
+            return future.result()
+        return value
 
     def validate_language(self, lang_code: str) -> bool:
         """
@@ -60,6 +78,7 @@ class TranslationService:
                 dest=target_lang,
                 src=source_lang
             )
+            result = self._resolve_maybe_awaitable(result)
             logger.debug(f"Translated text from {source_lang} to {target_lang}")
             return getattr(result, "text", str(result))
         except Exception as e:
@@ -106,6 +125,7 @@ class TranslationService:
         
         try:
             result = self.translator.translate(text, dest=target, src=source)
+            result = self._resolve_maybe_awaitable(result)
             logger.debug(f"Translated text from {source} to {target}")
             return getattr(result, "text", str(result))
         except Exception as e:
@@ -131,6 +151,7 @@ class TranslationService:
 
         try:
             detection = self.translator.detect(text)
+            detection = self._resolve_maybe_awaitable(detection)
             logger.debug(f"Detected language: {str(detection)}")
             return getattr(detection, "lang", str(detection))
         except Exception as e:
