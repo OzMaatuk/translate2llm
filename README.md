@@ -1,134 +1,144 @@
 # TranslateLLM
 
-A Python service that combines text translation with LLM processing, allowing for seamless translation of text and processing through a local LLM.
+REST API service that translates text and processes it through a local LLM (Ollama). Auto-detects source language, translates to your target language, and generates LLM responses.
 
 ## Features
 
-- Text translation using `googletrans`
-- Local LLM integration using Ollama
-- Configurable via `config.ini`
-- Environment variables support
-- Comprehensive error handling
-- Extensive logging
-- Unit testing support
-- Docker support
+- **REST API** with FastAPI (Swagger docs included)
+- **Auto language detection** and translation (googletrans)
+- **Local LLM** integration via Ollama
+- **Docker ready** with single command deployment
+- **Python package** for direct integration
+- Configurable via `config.ini` and environment variables
+
+## Quick Start
+
+**Prerequisites:**
+- Python 3.8+
+- [Ollama](https://ollama.ai) installed and running
+- Pull a model: `ollama pull mistral`
+
+**Install and run:**
+```bash
+pip install -r requirements.txt
+python api.py
+```
+
+Visit `http://localhost:8000/docs` for interactive API documentation.
+
+## Configuration
+
+Edit `config.ini` to customize:
+```ini
+[llm]
+model = mistral                          # Ollama model name
+base_url = http://localhost:11434        # Ollama server URL
+temperature = 0.0
+
+[translation]
+target_lang = en                         # Default target language
+source_lang = auto                       # Auto-detect source
+```
+
+Optional `.env` for API keys (googletrans doesn't require one):
+```env
+LOG_LEVEL=INFO
+```
+
+## Usage
+
+### REST API (Recommended)
+
+**Start server:**
+```bash
+python api.py
+# or: uvicorn api:app --reload
+```
+
+**Make requests:**
+```bash
+curl -X POST "http://localhost:8000/translate" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "¡Hola! ¿Cómo estás?", "target_lang": "en"}'
+```
+
+**Python client:**
+```python
+import requests
+
+response = requests.post("http://localhost:8000/translate", json={
+    "text": "Bonjour le monde!",
+    "target_lang": "en",
+    "system_prompt": "You are a helpful assistant."
+})
+
+result = response.json()
+# Returns: original_text, detected_language, translated_text, llm_response
+```
+
+**Interactive docs:** `http://localhost:8000/docs`
+
+### Python Package
+
+**Install from GitHub:**
+```bash
+pip install git+https://github.com/ozmaatuk/translate-llm.git
+```
+
+**Or clone and install locally:**
+```bash
+git clone https://github.com/ozmaatuk/translate-llm.git
+cd translate-llm
+pip install -e .
+```
+
+**Use in code:**
+```python
+from translate_llm import TranslateLLM
+
+service = TranslateLLM()
+result = service.process(text="Hola", target_lang="en")
+print(result['llm_response'])
+```
+
+### Docker
+
+```bash
+docker build -t translate-llm .
+docker run -p 8000:8000 translate-llm
+```
+
+Access at `http://localhost:8000`
+
+## API Endpoints
+
+- `GET /` - Service info
+- `GET /health` - Health check
+- `POST /translate` - Translate and process text
+  - Body: `{"text": "...", "target_lang": "en", "system_prompt": "..."}`
+  - Returns: `{"original_text", "detected_language", "translated_text", "llm_response"}`
+
+## Testing
+
+```bash
+pytest tests/                    # Run tests
+pytest --cov=src tests/         # With coverage
+```
 
 ## Project Structure
 
 ```
 translate-llm/
-├── src/                    # Source code
-│   ├── config/            # Configuration management
-│   ├── services/          # Core services (translation, LLM)
-│   └── translate_llm.py   # Main service class
-├── tests/                 # Unit tests
-├── config.ini            # Configuration file
-├── .env                  # Environment variables
-├── Dockerfile           # Docker configuration
-├── requirements.txt     # Python dependencies
-├── main.py             # Example usage
-└── README.md           # Documentation
-```
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/translate-llm.git
-cd translate-llm
-```
-
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-## Configuration
-
-1. Copy `.env.example` to `.env` and set your environment variables:
-```env
-LLM_API_KEY=your_api_key_here
-TRANSLATION_API_KEY=your_translation_api_key_here
-LOG_LEVEL=INFO
-```
-
-2. Adjust `config.ini` settings as needed:
-```ini
-[llm]
-model = mistral
-model_provider = ollama
-temperature = 0.0
-base_url = http://localhost:11434
-max_tokens = 1000
-
-[translation]
-source_lang = auto
-target_lang = en
-use_cache = true
-timeout = 5
-
-[logging]
-level = INFO
-format = %(asctime)s | %(levelname)s | %(name)s | %(message)s
-```
-
-## Usage
-
-Basic usage example:
-
-```python
-import asyncio
-from translate_llm import TranslateLLM
-
-async def main():
-    # Initialize service
-    service = TranslateLLM()
-    
-    # Process text
-    result = await service.process(
-        text="¡Hola! ¿Cómo estás?",
-        target_lang="en",
-        system_prompt="You are a helpful assistant."
-    )
-    
-    print(f"Original: {result['original_text']}")
-    print(f"Translated: {result['translated_text']}")
-    print(f"LLM Response: {result['llm_response']}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-## Docker Support
-
-Build the Docker image:
-```bash
-docker build -t translate-llm .
-```
-
-Run the container:
-```bash
-docker run --env-file .env translate-llm
-```
-
-## Testing
-
-Run the test suite:
-```bash
-pytest tests/
-```
-
-Run with coverage:
-```bash
-pytest --cov=src tests/
+├── api.py              # FastAPI REST service
+├── src/
+│   ├── translate_llm.py    # Main service class
+│   ├── config/             # Config management
+│   └── services/           # Translation & LLM services
+├── tests/              # Unit tests
+├── config.ini         # Configuration
+└── Dockerfile         # Docker setup
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License
