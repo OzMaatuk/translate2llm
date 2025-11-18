@@ -1,11 +1,11 @@
-"""FastAPI REST service for TranslateLLM."""
+"""FastAPI REST service for Translate2LLM."""
 import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
-from src.translate_llm import TranslateLLM
-from src.services.exceptions import TranslationError, LLMError
+from translate2llm import TranslateLLM
+from translate2llm.services.exceptions import TranslationError, LLMError
 
 # Configure logging
 logging.basicConfig(
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="TranslateLLM API",
+    title="Translate2LLM API",
     description="REST API for text translation and LLM processing",
     version="1.0.0"
 )
@@ -57,7 +57,7 @@ class TranslateResponse(BaseModel):
 async def root():
     """Root endpoint."""
     return {
-        "service": "TranslateLLM API",
+        "service": "Translate2LLM API",
         "version": "1.0.0",
         "status": "running"
     }

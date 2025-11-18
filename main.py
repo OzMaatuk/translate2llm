@@ -1,7 +1,7 @@
-"""Example usage of the TranslateLLM service."""
+"""Example usage of the Translate2LLM service."""
 import logging
-from src.translate_llm import TranslateLLM
-from src.services.exceptions import TranslationError, LLMError
+from translate2llm import TranslateLLM
+from translate2llm.services.exceptions import TranslationError, LLMError
 
 # Configure logging
 logging.basicConfig(
@@ -11,7 +11,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def main():
-    """Main function demonstrating TranslateLLM usage."""
+    """Main function demonstrating Translate2LLM usage."""
     try:
         # Initialize the service
         service = TranslateLLM()

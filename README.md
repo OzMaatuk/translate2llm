@@ -1,4 +1,4 @@
-# TranslateLLM
+# Translate2LLM
 
 REST API service that translates text and processes it through a local LLM (Ollama). Auto-detects source language, translates to your target language, and generates LLM responses.
 
@@ -82,19 +82,19 @@ result = response.json()
 
 **Install from GitHub:**
 ```bash
-pip install git+https://github.com/ozmaatuk/translate-llm.git
+pip install git+https://github.com/ozmaatuk/translate2llm.git
 ```
 
 **Or clone and install locally:**
 ```bash
-git clone https://github.com/ozmaatuk/translate-llm.git
-cd translate-llm
+git clone https://github.com/ozmaatuk/translate2llm.git
+cd translate2llm
 pip install -e .
 ```
 
 **Use in code:**
 ```python
-from translate_llm import TranslateLLM
+from translate2llm import TranslateLLM
 
 service = TranslateLLM()
 result = service.process(text="Hola", target_lang="en")
@@ -104,8 +104,8 @@ print(result['llm_response'])
 ### Docker
 
 ```bash
-docker build -t translate-llm .
-docker run -p 8000:8000 translate-llm
+docker build -t translate2llm .
+docker run -p 8000:8000 translate2llm
 ```
 
 Access at `http://localhost:8000`
@@ -121,17 +121,17 @@ Access at `http://localhost:8000`
 ## Testing
 
 ```bash
-pytest tests/                    # Run tests
-pytest --cov=src tests/         # With coverage
+pytest tests/                           # Run tests
+pytest --cov=translate2llm tests/      # With coverage
 ```
 
 ## Project Structure
 
 ```
-translate-llm/
+translate2llm/
 ├── api.py              # FastAPI REST service
 ├── src/
-│   ├── translate_llm.py    # Main service class
+│   ├── translate2llm.py    # Main service class
 │   ├── config/             # Config management
 │   └── services/           # Translation & LLM services
 ├── tests/              # Unit tests

@@ -1,5 +1,5 @@
 {
-  "name": "python_translate_to_llm",
+  "name": "python_translate2llm",
   "build": {
       "context": "..",
       "dockerfile": "../Dockerfile"
